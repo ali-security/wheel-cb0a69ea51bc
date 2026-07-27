@@ -1,16 +1,11 @@
-name: Run the test suite
+name: Run the test suite (seal cross-platform)
 
 on:
   push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
-  schedule:
-    - cron: '0 6 * * 1'
 
 jobs:
   test:
-    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -44,15 +39,15 @@ jobs:
     - name: Include SDist check dependencies
       if: matrix.python-version == '3.12'
       run: pip install build flit
+    # CI drift: pyproject's test extra asks for `setuptools >= 65`, which now
+    # resolves to a modern release whose PEP 625 filename normalization and
+    # license-file relocation break this version's test suite (14 failures in
+    # tests/test_bdist_wheel.py + tests/test_tagopt.py). 69.5.1 is the release
+    # contemporary with wheel 0.43.0 and is the same pin the verified Linux
+    # build uses. Installed last so it wins over the extra's resolution.
+    - name: Pin setuptools to the release contemporary with wheel 0.43.0
+      run: pip install "setuptools==69.5.1"
     - name: Test with pytest
       run: coverage run -m pytest -v
       env:
         PYTHONWARNDEFAULTENCODING: 1
-    - name: Generate coverage report
-      run: coverage xml
-    - name: Send coverage data to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: coverage.xml
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

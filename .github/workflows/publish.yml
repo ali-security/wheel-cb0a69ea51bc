@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    if: false
     runs-on: ubuntu-latest
     environment: release
     steps:
@@ -29,6 +30,7 @@ jobs:
         path: dist
 
   publish:
+    if: false
     needs: build
     runs-on: ubuntu-latest
     environment: release
@@ -41,6 +43,7 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
 
   release:
+    if: false
     name: Create a GitHub release
     needs: build
     runs-on: ubuntu-latest
